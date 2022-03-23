@@ -12,14 +12,14 @@ function App() {
       .then(body => setData(body));
   };
 
-  const sendData = (arg: boolean) => {
+  const triggerRing = (arg: string) => {
     interface dataObjProps {
-      kutas: boolean;
+      duration: string;
     }
     const dataObj: dataObjProps = {
-      kutas: arg
+      duration: arg
     }
-    fetch("http://localhost:5000/data",
+    fetch("http://localhost:5000/api/ring",
       {
         method: "POST",
         headers:{
@@ -28,12 +28,18 @@ function App() {
         body: JSON.stringify(dataObj)
       }
     )
+  }
+
+  const setRingConst = (arg: boolean) => {
+    let url: string;
+    arg ? url = 'on' : url = 'off';
+    fetch(`http://localhost:5000/api/ring/${url}`)
     .then(function(response){
       if(response.ok){
-        console.log('POST success.');
+        console.log('GET success.');
         return;
       }
-      throw new Error('POST failed.');
+      throw new Error('GET failed.');
     })
     .catch(function(error){
       console.log(error);
@@ -45,7 +51,7 @@ function App() {
   }, [])
   
 
-  const chuj = () => {
+  const refreshData = () => {
     getData();
     data ? console.log(data.data) : console.log("chuj");
   };
@@ -57,13 +63,20 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
-        <button onClick={chuj}>getData</button>
+        <button onClick={refreshData}>refresh data</button>
         <p>
           {/* Data: {data ? JSON.stringify(data) : 'eee'} */}
           Data: {data ? data.data : 'brak danych'}
         </p>
-        <button onClick={() => {sendData(true)}}>ON</button>
-        <button onClick={() => {sendData(false)}}>OFF</button>
+        <p>
+          <button onClick={() => {setRingConst(true)}}>ON</button>&nbsp;
+          <button onClick={() => {setRingConst(false)}}>OFF</button>
+        </p>
+        <br/><br/>
+        <p>
+          <button onClick={() => {triggerRing('short')}}>short</button>&nbsp;
+          <button onClick={() => {triggerRing('long')}}>long</button>
+        </p>
       </header>
     </div>
   );

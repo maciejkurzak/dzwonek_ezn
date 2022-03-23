@@ -49,6 +49,9 @@ class Ring {
 const shortRing = new Ring('short');
 shortRing.ring();
 
+const longRing = new Ring('long');
+longRing.ring();
+
 
 app.get('/', (req, res) => {
   console.log("elo benc");
@@ -60,21 +63,23 @@ app.get('/api/data', (req, res) => {
   res.json({data: Math.round(Math.random() * 100).toString()});
 });
 
-app.get('/on', (req, res) => {
+app.get('/api/ring/on', (req, res) => {
   console.log("ON");
-  res.send('ON');
   LED21.writeSync(1);
+  res.send('ON');
 });
 
-app.get('/off', (req, res) => {
+app.get('/api/ring/off', (req, res) => {
   console.log("OFF");
-  res.send('OFF');
   LED21.writeSync(0);
+  res.send('OFF');
 });
 
 
-app.post('/data', (req, res) => {
+app.post('/api/ring', (req, res) => {
+  const body = req.body;
   console.log(req.body);
+  body.duration === 'short' ? shortRing.ring() : longRing.ring();
   res.sendStatus(201);
 })
 
