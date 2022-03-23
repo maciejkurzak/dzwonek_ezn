@@ -1,51 +1,89 @@
-const Gpio = require('onoff').Gpio;
+// IMPORTS
+// Raspberry GPIO
+import Gpio from 'onoff';
+const gpio = Gpio.Gpio;
 
-const express = require('express')
-const app = express()
-const port = 5000
+// Web backend
+import express from 'express';
+const app = express();
+const port = 5000;
 
-// let LED16 = new Gpio(16, 'out');
-// let LED20 = new Gpio(20, 'out');
-let LED21 = new Gpio(21, 'out');
-// let LED26 = new Gpio(26, 'out');
+import cors from 'cors';
+import bodyParser from 'body-parser';
 
-// LED16.writeSync(1);
-// LED20.writeSync(1);
-LED21.writeSync(1);
-// LED26.writeSync(1);
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(cors());
 
-// setInterval(() => {
-//   console.log("ON");
+// Config
+import ringConfig from './config/config.js';
+
+
+
+
+// let LED16 = new gpio(16, 'out');
+// let LED20 = new gpio(20, 'out');
+let LED21 = new gpio(21, 'out');
+// let LED26 = new gpio(26, 'out');
+
+// const ring = () => {
 //   LED21.writeSync(1);
-// }, 2000);
-
-// setTimeout(() => {
-//   setInterval(() => {
-//     console.log("OFF");
+//   setTimeout(() => {
 //     LED21.writeSync(0);
-//   }, 2000)
-// }, 1000)
+//   }, 1000)
+// }
 
+class Ring {
+  constructor(durationName) {
+    this.duration = ringConfig[durationName].duration;
+  }
+  ring(duration) {
+    LED21.writeSync(1);
+    setTimeout(() => {
+      LED21.writeSync(0);
+    }, this.duration)
+  }
+}
 
+const shortRing = new Ring('short');
+shortRing.ring();
 
 
 app.get('/', (req, res) => {
   console.log("elo benc");
-  res.send('Hello World!');
-})
+  res.send('elo benc');
+});
+
+app.get('/api/data', (req, res) => {
+  console.log("wysyłam testowe dane");
+  res.json({data: Math.round(Math.random() * 100).toString()});
+});
 
 app.get('/on', (req, res) => {
   console.log("ON");
   res.send('ON');
   LED21.writeSync(1);
-})
+});
 
 app.get('/off', (req, res) => {
   console.log("OFF");
   res.send('OFF');
   LED21.writeSync(0);
+});
+
+
+app.post('/data', (req, res) => {
+  console.log(req.body);
+  res.sendStatus(201);
 })
 
+
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-})
+  console.log(`Listening at http://localhost:${port}`);
+});
+
+
+process.on('SIGINT', _ => {
+  LED21.unexport();
+});
